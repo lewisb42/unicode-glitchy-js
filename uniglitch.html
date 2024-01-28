@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        drawGlitches(50);
+    });
+    
+    function drawGlitches(gridSize, useEmoji) {
+        var canvas = document.getElementById("glitcharea");
+        var ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var width = canvas.width;
+        var height = canvas.height;
+        
+        
+        
+        for (x = 0; x < width; x += gridSize) {
+          for (y = 0; y < height; y += gridSize) {
+            // fill the background of just that square with a random color
+            ctx.fillStyle = randomC64Color();
+            ctx.fillRect(x, y, gridSize, gridSize);    
+
+            // draw an emoji in each square
+            
+            ctx.font = "" + fontSize + "px monospace";
+            if (useEmoji) {
+              var symbol = randomSupplementaryMultilingualPlane();
+              var fontSize = gridSize * 0.8;
+            } else {
+              var symbol = randomMonoColorSymbol();
+              var fontSize = gridSize;
+            }
+            
+            var charWidth = ctx.measureText(symbol).width;
+            let xOffset = (gridSize - charWidth) / 2;
+            
+            var yOffset = 0.25 * gridSize;
+            ctx.strokeStyle = randomC64Color();
+            ctx.strokeText(symbol, x+xOffset, y-yOffset);
+          }
+        }
+    }
+    
+    function isEmojiChecked() {
+      return document.getElementById("emojiCheck").checked;
+    }
+    
+    function randomC64Color() {
+      var colors = [
+        '#000000', '#FFFFFF', '#880000', '#AAFFEE', '#CC44CC', '#00CC55', '#0000AA', '#EEEE77',
+        '#DD8855', '#664400', '#FF7777', '#333333', '#777777', '#AAFF66', '#0088FF', '#BBBBBB'
+      ];
+      
+      var rng = Math.floor(Math.random() * 7);
+      return colors[rng];
+    }
+    
+    function randomSupplementaryMultilingualPlane() {
+      return unicodeFromRange(0x1F000, 0x1FAFF);
+    }
+    
+    function randomMonoColorSymbol() {
+      // a selection of English-centric letters and symbols
+      var s1 = unicodeStringFromRange(0, 0x7F);
+      s1 += unicodeStringFromRange(0x2000, 0x20CF);
+      //s1 += unicodeStringFromRange(0x2100, 0x243F);
+      //s1 += unicodeStringFromRange(0x2500, 0x2BFF);
+      //s1 += unicodeStringFromRange(0x1F700, 0x1FAFF);
+      
+      var rng = randomFromRange(0, s1.length);
+      return s1[rng];
+    }
+    
+    function randomEmoji() {
+      return unicodeFromRange(0x1F600, 0x1F64F);
+    }
+    
+    function randomTransportAndMapSymbols() {
+      return unicodeFromRange(0x1F680, 0x1F6FF);
+    }
+    
+    function unicodeFromRange(min, max) {
+      var codepoint = randomFromRange(min, max);
+      return String.fromCodePoint(codepoint);
+    }
+    
+    function unicodeStringFromRange(min, max) {
+      var fullString = "";
+      for (i = min; i <= max; i++) {
+        fullString += String.fromCodePoint(i);
+      }
+      return fullString;
+    }
+    
+    function randomFromRange(min, max) {
+      return Math.floor(Math.random() * (max - min) + min);
+    }
+    
+    function redraw() {
+        var size = getSize();
+        drawGlitches(size, isEmojiChecked());
+    }
+    
+    function getSize() {
+        return parseInt(document.getElementById("sizeSpinner").value);
+    }
+    
+    function updateSpinner() {
+        var val = document.getElementById("sizeSelector").value;
+        var spinner = document.getElementById("sizeSpinner");
+        spinner.value = val;
+        redraw();
+    }
+</script>
+
+</head>
+<body>
+
+    
+    
+    <div id="controls" style="white-space: nowrap">
+    
+        <div style="display: inline-block; margin:10px; float:left">
+            <strong>UNICODE GLITCH PATTERN GENERATOR<strong>
+        </div>
+    
+        <div id="sizingControls" style="display: inline-block; margin:10px">
+            Grid Size
+            <select id="sizeSelector" onchange="updateSpinner()">
+                <option value="80">Extra Large</option>
+                <option value="50" selected>Large</option>
+                <option value="30">Medium</option>
+                <option value="10">Small</option>
+            </select>
+            or
+            <input id="sizeSpinner" type="number" min="5" max="100" step="5" value="50" size="3" onchange="redraw()">
+        </div>
+        
+        <div id="glyphControls" style="display: inline-block; margin:10px">
+          <input id="emojiCheck" type="checkbox" name="emojiCheckbox" onchange="redraw()">
+          <label for="emojiCheckbox">Use Emojis?</label>
+        </div>
+        
+        <div id="redrawButton" style="display: inline-block; margin:10px">
+          <input type="button" onclick="redraw()" value="Refresh">
+        </div>
+        
+        <div id="license" style="display: inline-block; margin:10px; float:right">
+            license: <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3.0</a>
+        </div>
+        
+        <div id="author" style="display: inline-block; margin:10px; float:right">
+            author: <a href="https://github.com/lewisb42">Lewis Baumstark</a>
+        </div>
+        
+        
+    </div>
+    
+    <canvas id="glitcharea" ></canvas>
+</body>
+</html>
